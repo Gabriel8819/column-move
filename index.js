@@ -9,7 +9,9 @@ let y;
 
 
 
-console.log(columns[1], cards[1], container)
+// columns[1].style.transform = "translate(-100%)"
+
+console.log(columns[1].offsetLeft)
 
 
 let currentCard = null;
@@ -28,7 +30,7 @@ for(let i = 0; i < cards.length; i++){
 
             currentCard = cards[i];
             parentElement = currentCard.parentElement;
-            // currentCard.classList.add("card-drag")
+            currentCard.classList.add("card-drag")
             
             clone = currentCard.cloneNode();
             clone.style.position = "absolute";
@@ -36,10 +38,11 @@ for(let i = 0; i < cards.length; i++){
             container.appendChild(clone);
             
             
-            
             clone.style.top = `${currentCard.offsetTop}px`;
             clone.style.left = `${currentCard.offsetLeft}px`;
             
+            console.log(clone.offsetLeft)
+            console.log(currentCard.offsetLeft)
             // currentCard.style.display = "none";
             
 
@@ -71,37 +74,73 @@ function mousemove(e){
     clone.style.left = `${clone.offsetLeft + dx}px`;
     clone.style.top = `${clone.offsetTop + dy}px`;
 
-    // if(){
+    
 
-    // }
+
+
     
     let closest = {
         col: null,
-        distance: Number.NEGATIVE_INFINITY};
+        distance: Number.NEGATIVE_INFINITY
+    };
 
+    let rightClosest = Number.POSITIVE_INFINITY;
+    let col;
 
     columns.forEach((column)=>{
         if(parentElement === column) return;
          
-        if(column.offsetLeft - x < 0 && closest.distance < column.offsetLeft - x){
-            // console.log(closest.column);
-            closest = {
-                distance: column.offsetLeft - x,
-                col: column
-            };
+        // if(column.offsetLeft - x > 0 && closest.distance > column.offsetLeft - x){
+        //     // console.log(closest.column);
+        //     closest = {
+        //         distance: column.offsetLeft - x,
+        //         col: column
+        //     };
+        // }
+
+
+        if(dx > 0){
+            //going right
+            if(column.offsetLeft - x < 0 && column.offsetLeft > currentCard.parentElement.offsetLeft){
+               
+                // rightClosest = column.offsetLeft - x
+                column.style.transform = "translateX(-100%)"
+                if(column.offsetLeft + column.offsetWidth - x > closest.distance){
+
+                    let off = (column.offsetLeft - currentCard.parentElement.offsetLeft) / 210 
+                    closest.col = off
+                    console.log(column.offsetLeft , currentCard.parentElement.offsetLeft)
+            
+                    closest.distance = column.offsetLeft + column.offsetWidth - x;
+                }
+    
+            }
+          
+        }else{
+            //going left
+        
+            if(column.offsetLeft + column.offsetWidth  > x ){
+                // console.log(column)
+    
+    
+    
+    
+            }
+
+
         }
+
+
     });
 
-    if(closest.col != null){
-        translatePercent += 100
-        closest.col.style.transform = "translateX(-100%)"
-        parentElement.style.transform = `translateX(${translatePercent}%)`;
 
 
-        
+
+    currentCard.parentElement.style.transform = `translate(${closest.col * 100}%)`;
+
+    if(col !== undefined){
+
     }
-
-
 
 }
 
@@ -110,7 +149,7 @@ function mouseup(e){
     
     if(currentCard !== null){
       currentCard.classList.remove("card-drag");
-      currentCard.style.display = "block"
+    //   currentCard.style.display = "block"
 
       container.removeChild(clone);
 
@@ -161,9 +200,6 @@ function mouseup(e){
 
 
 */
-
-
-
 
 
 
