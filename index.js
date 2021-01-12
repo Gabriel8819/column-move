@@ -33,8 +33,8 @@ for(let i = 0; i < cards.length; i++){
             currentCard.classList.add("card-drag")
             
             clone = currentCard.cloneNode();
-            clone.style.position = "absolute";
-            clone.style.display = "block";
+            // clone.style.position = "absolute";
+            // clone.style.display = "block";
             container.appendChild(clone);
             
             
@@ -68,7 +68,7 @@ function mousemove(e){
     y = e.clientY - container.offsetTop;
 
     
-    // console.log(clone.offsetLeft, clone.offsetTop);
+    console.log(clone.offsetLeft, currentCard.offsetTop);
 
 
     clone.style.left = `${clone.offsetLeft + dx}px`;
@@ -119,13 +119,13 @@ function mousemove(e){
         }else{
             //going left
         
-            if(column.offsetLeft + column.offsetWidth  > x ){
-                // console.log(column)
+            // if(column.offsetLeft + column.offsetWidth  > x ){
+            //     // console.log(column)
     
     
     
     
-            }
+            // }
 
 
         }
@@ -153,8 +153,8 @@ function mouseup(e){
 
       container.removeChild(clone);
 
-      clone.style.top = "";
-      clone.style.left = "";
+    //   clone.style.top = "";
+    //   clone.style.left = "";
     }
     currentCard = null;
     clone = null;
