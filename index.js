@@ -12,12 +12,21 @@ let y;
 // columns[1].style.transform = "translate(-100%)"
 
 console.log(columns[1].offsetLeft)
+// columns[1].style.transform = `translate(100%)`
+console.log(columns[1].offsetLeft)
 
 
 let currentCard = null;
+let switchColumn = null;
 let parentElement = null;
 let clone = null;
 let translatePercent = 0;
+
+
+
+let orderColumns= [];
+
+
 
 for(let i = 0; i < cards.length; i++){
 
@@ -29,20 +38,21 @@ for(let i = 0; i < cards.length; i++){
 
 
             currentCard = cards[i];
+            // currentCard.parentElement.style.visibility = "hidden"
             parentElement = currentCard.parentElement;
-            currentCard.classList.add("card-drag")
             
             clone = currentCard.cloneNode();
+            clone.classList.add("card-drag")
             // clone.style.position = "absolute";
             // clone.style.display = "block";
             container.appendChild(clone);
+            // clone.style.top
             
             
             clone.style.top = `${currentCard.offsetTop}px`;
             clone.style.left = `${currentCard.offsetLeft}px`;
             
-            console.log(clone.offsetLeft)
-            console.log(currentCard.offsetLeft)
+         
             // currentCard.style.display = "none";
             
 
@@ -67,8 +77,7 @@ function mousemove(e){
     x = e.clientX - container.offsetLeft;
     y = e.clientY - container.offsetTop;
 
-    
-    console.log(clone.offsetLeft, currentCard.offsetTop);
+
 
 
     clone.style.left = `${clone.offsetLeft + dx}px`;
@@ -84,79 +93,91 @@ function mousemove(e){
         distance: Number.NEGATIVE_INFINITY
     };
 
-    let rightClosest = Number.POSITIVE_INFINITY;
-    let col;
+
 
     columns.forEach((column)=>{
         if(parentElement === column) return;
          
-        // if(column.offsetLeft - x > 0 && closest.distance > column.offsetLeft - x){
-        //     // console.log(closest.column);
-        //     closest = {
-        //         distance: column.offsetLeft - x,
-        //         col: column
-        //     };
-        // }
-
-
-        if(dx > 0){
-            //going right
             if(column.offsetLeft - x < 0 && column.offsetLeft > currentCard.parentElement.offsetLeft){
-               
-                // rightClosest = column.offsetLeft - x
-                column.style.transform = "translateX(-100%)"
-                if(column.offsetLeft + column.offsetWidth - x > closest.distance){
-
-                    let off = (column.offsetLeft - currentCard.parentElement.offsetLeft) / 210 
-                    closest.col = off
-                    console.log(column.offsetLeft , currentCard.parentElement.offsetLeft)
-            
-                    closest.distance = column.offsetLeft + column.offsetWidth - x;
+              
+                column.style.transform = "translateX(-100%)";
+         
+                if(column.offsetLeft - x > closest.distance){
+                    switchColumn = closest.col = column
+                    closest.distance = column.offsetLeft - x
                 }
     
+            }else if(column.offsetLeft + column.offsetWidth > x && column.offsetLeft < currentCard.parentElement.offsetLeft){
+                column.style.transform = "translateX(100%)"
+
+                if(x - column.offsetLeft + column.offsetWidth > closest.distance){
+                    switchColumn = closest.col = column
+                    closest.distance = x - column.offsetLeft + column.offsetWidth
+                }
+
+            }else{
+                column.style.transform = "";
+                
             }
-          
-        }else{
-            //going left
-        
-            // if(column.offsetLeft + column.offsetWidth  > x ){
-            //     // console.log(column)
-    
-    
-    
-    
-            // }
-
-
-        }
-
-
     });
 
+    
 
-
-
-    currentCard.parentElement.style.transform = `translate(${closest.col * 100}%)`;
-
-    if(col !== undefined){
-
+    if(closest.col !== null){
+        let s = (closest.col.offsetLeft - currentCard.parentElement.offsetLeft) / 210
+        // console.log(closest.col.offsetLeft , currentCard.parentElement.offsetLeft)
+        console.log(s)
+        currentCard.parentElement.style.transform = `translate(${s * 100}%)`;
+    }else{
+        currentCard.parentElement.style.transform = "";
     }
+
+
 
 }
 
 
 function mouseup(e){
+
+    //@todo
+    //keep track of the column into a data structure to switch  between appendChild or insertafter
+
+
+    currentCard.parentElement.style.transform = "";
     
+    columns.forEach((column)=>{
+        column.style.transform = ""
+    })
+
+    let moveColumn = currentCard.parentElement.parentElement;
+    let parentSwitch = switchColumn.parentElement;
+
+
+    let toMove = moveColumn.removeChild(currentCard.parentElement);
+    let toSwitch = parentSwitch.removeChild(switchColumn);
+
+    moveColumn.appendChild(toSwitch)
+    parentSwitch.appendChild(toMove)
+
+
+    // console.log(toMove, toSwitch, parentSwitch)
+
+
+
     if(currentCard !== null){
-      currentCard.classList.remove("card-drag");
-    //   currentCard.style.display = "block"
+        currentCard.classList.remove("card-drag");
+        currentCard.parentElement.style.visibility = ""
+        //   currentCard.style.display = "block"
 
-      container.removeChild(clone);
 
-    //   clone.style.top = "";
-    //   clone.style.left = "";
+        container.removeChild(clone);
+        
+        //   clone.style.top = "";
+        //   clone.style.left = "";
     }
+    
     currentCard = null;
+    switchColumn = null;
     clone = null;
     document.removeEventListener("mousemove", mousemove)
     document.removeEventListener("mouseup", mouseup)
