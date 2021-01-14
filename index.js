@@ -17,6 +17,7 @@ console.log(columns[1].offsetLeft)
 
 
 let currentCard = null;
+let currentCardPos = null;
 let switchColumn = null;
 let parentElement = null;
 let clone = null;
@@ -24,37 +25,31 @@ let translatePercent = 0;
 
 
 
-let orderColumns= [];
 
 
 
 for(let i = 0; i < cards.length; i++){
-
+        
         cards[i].addEventListener("mousedown", (e)=>{
+     
             e.preventDefault()
 
             x = e.clientX - container.offsetLeft;
             y = e.clientY - container.offsetTop;
 
-
             currentCard = cards[i];
-            // currentCard.parentElement.style.visibility = "hidden"
             parentElement = currentCard.parentElement;
+            currentCardPos = parentElement.offsetLeft / 210;
+            // currentCard.parentElement.style.visibility = "hidden";
+
             
             clone = currentCard.cloneNode();
-            clone.classList.add("card-drag")
-            // clone.style.position = "absolute";
-            // clone.style.display = "block";
+            clone.classList.add("card-drag");
             container.appendChild(clone);
-            // clone.style.top
             
             
             clone.style.top = `${currentCard.offsetTop}px`;
             clone.style.left = `${currentCard.offsetLeft}px`;
-            
-         
-            // currentCard.style.display = "none";
-            
 
             document.addEventListener("mousemove", mousemove);
             document.addEventListener("mouseup", mouseup);
@@ -67,9 +62,6 @@ for(let i = 0; i < cards.length; i++){
 
 
 
-
-
-
 function mousemove(e){
     let dx = e.clientX - container.offsetLeft - x;
     let dy = e.clientY - container.offsetTop - y;
@@ -78,14 +70,8 @@ function mousemove(e){
     y = e.clientY - container.offsetTop;
 
 
-
-
     clone.style.left = `${clone.offsetLeft + dx}px`;
     clone.style.top = `${clone.offsetTop + dy}px`;
-
-    
-
-
 
     
     let closest = {
@@ -95,94 +81,192 @@ function mousemove(e){
 
 
 
-    columns.forEach((column)=>{
-        if(parentElement === column) return;
-         
-            if(column.offsetLeft - x < 0 && column.offsetLeft > currentCard.parentElement.offsetLeft){
-              
-                column.style.transform = "translateX(-100%)";
-         
-                if(column.offsetLeft - x > closest.distance){
-                    switchColumn = closest.col = column
-                    closest.distance = column.offsetLeft - x
-                }
-    
-            }else if(column.offsetLeft + column.offsetWidth > x && column.offsetLeft < currentCard.parentElement.offsetLeft){
-                column.style.transform = "translateX(100%)"
+    for(let i = 0; i < columns.length; i++){
+        
+        if(parentElement === columns[i])  continue;
 
-                if(x - column.offsetLeft + column.offsetWidth > closest.distance){
-                    switchColumn = closest.col = column
-                    closest.distance = x - column.offsetLeft + column.offsetWidth
-                }
+        if(columns[i].offsetLeft - x < 0 && columns[i].offsetLeft > currentCard.parentElement.offsetLeft){
+            //Go right
+           
+            columns[i].style.transform = "translateX(-100%)";
 
-            }else{
-                column.style.transform = "";
+            if(columns[i].offsetLeft - x > closest.distance){
+                switchColumn = columns[i].parentElement.offsetLeft / 210
                 
+                closest.col = columns[i];
+                closest.distance = columns[i].offsetLeft - x;
             }
-    });
 
-    
+        }else if(columns[i].offsetLeft + columns[i].offsetWidth > x && columns[i].offsetLeft < currentCard.parentElement.offsetLeft){
+            //Go left
+            columns[i].style.transform = "translateX(100%)";
+            
+            if(x - columns[i].offsetLeft + columns[i].offsetWidth > closest.distance){
+                switchColumn = columns[i].parentElement.offsetLeft / 210 
 
-    if(closest.col !== null){
-        let s = (closest.col.offsetLeft - currentCard.parentElement.offsetLeft) / 210
-        // console.log(closest.col.offsetLeft , currentCard.parentElement.offsetLeft)
-        console.log(s)
-        currentCard.parentElement.style.transform = `translate(${s * 100}%)`;
-    }else{
-        currentCard.parentElement.style.transform = "";
+                closest.col = columns[i];
+                closest.distance = x - columns[i].offsetLeft + columns[i].offsetWidth;
+            }
+
+        }else{
+            columns[i].style.transform = "";
+            
+            
+        }
+        
     }
 
 
+
+    if(closest.col !== null){
+        let s = (closest.col.offsetLeft - currentCard.parentElement.offsetLeft) / 210
+        
+        currentCard.parentElement.style.transform = `translate(${s * 100}%)`;
+
+
+    }else{
+        currentCard.parentElement.style.transform = "";
+        switchColumn = null
+        
+
+
+    }
+
+    console.log(switchColumn)
 
 }
 
 
 function mouseup(e){
-
-    //@todo
-    //keep track of the column into a data structure to switch  between appendChild or insertafter
-
-
-    currentCard.parentElement.style.transform = "";
-    
-    columns.forEach((column)=>{
-        column.style.transform = ""
-    })
-
-    let moveColumn = currentCard.parentElement.parentElement;
-    let parentSwitch = switchColumn.parentElement;
-
-
-    let toMove = moveColumn.removeChild(currentCard.parentElement);
-    let toSwitch = parentSwitch.removeChild(switchColumn);
-
-    moveColumn.appendChild(toSwitch)
-    parentSwitch.appendChild(toMove)
-
-
-    // console.log(toMove, toSwitch, parentSwitch)
-
-
-
-    if(currentCard !== null){
-        currentCard.classList.remove("card-drag");
-        currentCard.parentElement.style.visibility = ""
-        //   currentCard.style.display = "block"
-
-
-        container.removeChild(clone);
         
-        //   clone.style.top = "";
-        //   clone.style.left = "";
-    }
+
+        currentCard.parentElement.style.transform = "";
+        
+        columns.forEach((column)=>{
+        column.style.transform = "";
+        })
+
+        if(switchColumn !== null){
+            // console.log(currentCardPos);
+            // console.log(switchColumn);
+
+
+
+            // let currentColumnWrapper = columns[0].parentElement;
+            // let columnWrapper2 = columns[1].parentElement;
+            // let columnWrapper3 = columns[2].parentElement;
+
+            // let c = currentColumnWrapper.removeChild(currentCard.parentElement);
+            // let c1 = columnWrapper2.removeChild(columns[1]);
+            // let c2 = columnWrapper3.removeChild(columns[2]);
+
+            
+            // currentColumnWrapper.appendChild(c1);
+            // columnWrapper2.appendChild(c2);
+            // columnWrapper3.appendChild(c);
+
+
+            // columns[switchColumn].parentElement.appendChild(currentCard.parentElement);
+            
+
+
+
+
+
+            if(currentCardPos < switchColumn){
+
+                let lastColumn;
+                let lastCard;
+
+                for (let i = currentCardPos; i <= switchColumn; i++) {
+                    
+                    let bufferCol = columns[i].parentElement;
+                    
+                    if(i === currentCardPos){
+                        lastColumn = bufferCol;
+                        lastCard = bufferCol.removeChild(columns[i]);
+                        continue;
+                    }
+
+                    bufferCol.removeChild(columns[i]);
+                    lastColumn.appendChild(columns[i])
+                    lastColumn = bufferCol;
+
+
+                    if(i === switchColumn){
+                        bufferCol.appendChild(lastCard)
+                    }
+                }
+            }else{
+                
+                let lastColumn;
+                let lastCard;
+                
+                
+                for (let i = currentCardPos; i >= switchColumn; i--) {
+                    console.log("test")
+                
+                    let bufferCol = columns[i].parentElement;
+                    
+                    if(i === currentCardPos){
+                        lastColumn = bufferCol;
+                        lastCard = bufferCol.removeChild(columns[i]);
+                        continue;
+                    }
+
+                    lastColumn.appendChild(bufferCol.removeChild(columns[i]));
+                    lastColumn = bufferCol;
+
+                    if(i === switchColumn){
+                        lastColumn.appendChild(lastCard);
+                    }
+                }
+            }
+         
+
+            //a lenvers+
+        
+
+
+
+            // let moveParent = columns[currentCardPos].parentElement;
+            // let switchParent = columns[switchColumn].parentElement;
+
+            // // console.log(moveParent, switchParent)
+
+
+            // let c = moveParent.removeChild(columns[currentCardPos])
+            // let s = switchParent.removeChild(columns[switchColumn])
+
+            // moveParent.appendChild(s)
+            // switchParent.appendChild(c)
+
+
+
+
+        }
+        
+        if(currentCard !== null){
+            currentCard.classList.remove("card-drag");
+            currentCard.parentElement.style.visibility = ""
+            //   currentCard.style.display = "block"
+
+            container.removeChild(clone);
+
+            
+            //   clone.style.top = "";
+            //   clone.style.left = "";
+        }
+
+        columns = Array.prototype.slice.call(document.querySelectorAll(".column"))
+        
+        currentCard = null;
+        switchColumn = null;
+        clone = null;
+        document.removeEventListener("mousemove", mousemove)
+        document.removeEventListener("mouseup", mouseup)
+    // }
     
-    currentCard = null;
-    switchColumn = null;
-    clone = null;
-    document.removeEventListener("mousemove", mousemove)
-    document.removeEventListener("mouseup", mouseup)
-
-
 }
 
 
